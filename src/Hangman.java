@@ -10,20 +10,22 @@ class User {
     String password;
     int score = 0;
 }
+
 class Hanger {
     public static final String ANSI_PURPLE = "\u001B[35m";
     public static final String ANSI_RESET = "\u001B[0m";
 
-    int step ;
-    String username ;
-    int maxumum_chances ;
-    Hanger(){
+    int step;
+    String username;
+    int maxumum_chances;
+
+    Hanger() {
         step = 0;
         username = "";
         maxumum_chances = 0;
     }
+
     static void print_hanger(int step, String username, int maximum_chances) {
-//        clrscr();
         System.out.println("\nplaying as " + username + "\n\n");
         System.out.print(ANSI_PURPLE);
         System.out.println("----");
@@ -89,7 +91,32 @@ class Hanger {
     }
 }
 
+class Vs_And_Xs_printer {
+
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_RESET = "\u001B[0m";
+
+    int wrong_guessed_alphabets = 0;
+    int chances = 7;
+
+    void print(int wrong_guessed_alphabets, int chances) {
+        if (wrong_guessed_alphabets > 0)
+            System.out.print(ANSI_RED + "|" + ANSI_RESET);
+        else
+            System.out.print(ANSI_GREEN + "|" + ANSI_RESET);
+        for (int i = 0; i < wrong_guessed_alphabets; i++) {
+            System.out.print(ANSI_RED + " X |" + ANSI_RESET);
+        }
+        for (int i = wrong_guessed_alphabets; i < chances; i++) {
+            System.out.print(ANSI_GREEN + " V |" + ANSI_RESET);
+        }
+        System.out.println();
+    }
+}
+
 public class Hangman {
+
     public static final String ANSI_RED = "\u001B[31m";
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_YELLOW = "\u001B[33m";
@@ -106,18 +133,18 @@ public class Hangman {
         }
     }
 
-    static void Signin_Signup(ArrayList usernames, ArrayList passwords, ArrayList scores) {
+    static void Signin_Signup(User[] users, ArrayList usernames, ArrayList passwords, ArrayList scores) {
         Scanner input = new Scanner(System.in);
         clrscr();
         System.out.println();
         System.out.println("1.SignUp / 2.Login");
         int what_to_do = input.nextInt();
         if (what_to_do == 1) {
-            Signup(usernames, passwords, scores);
+            Signup(users, usernames, passwords, scores);
         } else if (what_to_do == 2) {
-            Login(usernames, passwords, scores);
+            Login(users, usernames, passwords, scores);
         } else
-            Signin_Signup(usernames, passwords, scores);
+            Signin_Signup(users, usernames, passwords, scores);
     }
 
     static boolean is_password_acceptable(String password) {
@@ -132,7 +159,16 @@ public class Hangman {
             return false;
     }
 
-    static void Signup(ArrayList usernames, ArrayList passwords, ArrayList scores) {
+    static User[] addUser(User[] users) {
+        User[] temp = new User[users.length + 1];
+        for (int i = 0; i < users.length; i++) {
+            temp[i] = users[i];
+        }
+        temp[temp.length - 1] = new User();
+        return temp;
+    }
+
+    static void Signup(User[] users, ArrayList usernames, ArrayList passwords, ArrayList scores) {
         clrscr();
         System.out.println("Choose a username : ");
         Scanner input = new Scanner(System.in);
@@ -145,6 +181,8 @@ public class Hangman {
             username = input.nextLine();
         }
         usernames.add(username);
+        users = addUser(users);
+        users[users.length - 1].username = username;
         System.out.println("Choose a password that contains small and capital alphabets and numbers and special characters and longer that 6 digits :");
         String password = input.nextLine();
         while (!is_password_acceptable(password)) {
@@ -155,11 +193,12 @@ public class Hangman {
             password = input.nextLine();
         }
         passwords.add(password);
+        users[users.length - 1].password = password;
         scores.add(0);
-        Login(usernames, passwords, scores);
+        Login(users, usernames, passwords, scores);
     }
 
-    static void Login(ArrayList usernames, ArrayList passwords, ArrayList scores) {
+    static void Login(User[] users, ArrayList usernames, ArrayList passwords, ArrayList scores) {
         clrscr();
         Scanner input = new Scanner(System.in);
         System.out.println("1.Start game / 2.Show leaderboard");
@@ -192,19 +231,26 @@ public class Hangman {
                 passwordChars = console.readPassword();
                 password = new String(passwordChars);
             }
-            play(username, scores, index);
+            play(users, username, scores, index);
         } else {                            // means that we should show leader board
             for (int i = 0; i < usernames.size(); i++) { //sorts the leaderboard
                 for (int j = i + 1; j < usernames.size(); j++) {
                     if ((int) scores.get(j) > (int) scores.get(i)) {
+                        ///
                         Collections.swap(usernames, i, j);
                         Collections.swap(passwords, i, j);
                         Collections.swap(scores, i, j);
+                        ///
+//                        User temp = users[i];
+//                        users[i] = users[j];
+//                        users[j] = temp;
+                        ///
                     }
                 }
             }
             for (int i = 0; i < usernames.size(); i++) {
-                System.out.print(usernames.get(i));
+                System.out.print(i + 1);
+                System.out.print(". " + usernames.get(i));
                 System.out.print(" : ");
                 System.out.println(scores.get(i));
             }
@@ -213,11 +259,11 @@ public class Hangman {
             while (Continue != 1) {
                 Continue = input.nextInt();
             }
-            Signin_Signup(usernames, passwords, scores);
+            Signin_Signup(users, usernames, passwords, scores);
         }
     }
 
-    static void play(String username, ArrayList scores, int index) {
+    static void play(User[] users, String username, ArrayList scores, int index) {
         String[] words = {"tehran", "pizza", "banana", "new york", "advanced programming", "michael jordan",
                 "lionel messi", "apple", "macaroni", "university", "intel", "kitten", "python", "java",
                 "data structures", "algorithm", "assembly", "basketball", "hockey", "leader", "javascript",
@@ -320,6 +366,7 @@ public class Hangman {
         if (not_guessed_alphabets.size() == 0) {
             System.out.println("YOU WON !");
             scores.set(index, (int) scores.get(index) + 5);
+//            users[index].score += 5;
 
         } else {
             System.out.println("YOU LOST !");
@@ -339,21 +386,15 @@ public class Hangman {
 
     static void print_word(String word, ArrayList guessed_alphabets, int wrong_guessed_alphabets) {
         System.out.println();
+        ////////////////
         // Vs ans Xs
         int chances = 7;
         if (word.length() > 9)
             chances = 14;
-        if (wrong_guessed_alphabets > 0)
-            System.out.print(ANSI_RED + "|" + ANSI_RESET);
-        else
-            System.out.print(ANSI_GREEN + "|" + ANSI_RESET);
-        for (int i = 0; i < wrong_guessed_alphabets; i++) {
-            System.out.print(ANSI_RED + " X |" + ANSI_RESET);
-        }
-        for (int i = wrong_guessed_alphabets; i < chances; i++) {
-            System.out.print(ANSI_GREEN + " V |" + ANSI_RESET);
-        }
-        System.out.println();
+        Vs_And_Xs_printer word_printer = new Vs_And_Xs_printer();
+        word_printer.chances = chances;
+        word_printer.wrong_guessed_alphabets = wrong_guessed_alphabets;
+        word_printer.print(word_printer.wrong_guessed_alphabets, word_printer.chances);
         ////////////////
         System.out.println("\n");
         for (int i = 0; i < word.length(); i++) {
@@ -375,9 +416,9 @@ public class Hangman {
         ArrayList<String> usernames = new ArrayList<String>(0); // all the usernames
         ArrayList<String> passwords = new ArrayList<String>(0); // all the passwords
         ArrayList<Integer> scores = new ArrayList<Integer>(0);  // all the scores
-
+        User[] users = new User[0];
         while (true) {
-            Signin_Signup(usernames, passwords, scores);
+            Signin_Signup(users, usernames, passwords, scores);
         }
     }
 }
