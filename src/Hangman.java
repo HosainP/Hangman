@@ -248,12 +248,17 @@ public class Hangman {
                     }
                 }
             }
+            System.out.println();
+            System.out.println("--------------------");
             for (int i = 0; i < usernames.size(); i++) {
                 System.out.print(i + 1);
                 System.out.print(". " + usernames.get(i));
                 System.out.print(" : ");
                 System.out.println(scores.get(i));
+                System.out.println("--------------------");
             }
+
+            System.out.println();
             System.out.println("press 1 to continue : ");
             int Continue = input.nextInt();
             while (Continue != 1) {
@@ -429,5 +434,3 @@ public class Hangman {
 // Xs & Vs
 // color printings
 // }
-
-// todo make leaderboard more nice
